@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js nifty100gapup \"Nifty 100 Gap up\""
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode chartink/node/scanner.js nifty100gapup \"Nifty 100 Gap up\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -16,7 +16,7 @@
     },
     {
       "parameters": {
-        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js d-w-m-supertrend-11 \"Cash-Stocks Supertrend on D,W,M\""
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode chartink/node/scanner.js d-w-m-supertrend-11 \"Cash-Stocks Supertrend on D,W,M\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -29,7 +29,7 @@
     },
     {
       "parameters": {
-        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js d-w-m-supertrend-indices \"Indices Supertrend on D,W,M\""
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode chartink/node/scanner.js d-w-m-supertrend-indices \"Indices Supertrend on D,W,M\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -42,7 +42,7 @@
     },
     {
       "parameters": {
-        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js indicessupertrend1d \"Indices Supertrend 1D\""
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode chartink/node/scanner.js indicessupertrend1d \"Indices Supertrend 1D\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -55,7 +55,7 @@
     },
     {
       "parameters": {
-        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js supertrend1d-2 \"Cash-Supertrend-1D\""
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode chartink/node/scanner.js supertrend1d-2 \"Cash-Supertrend-1D\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -348,7 +348,7 @@
     "timezone": "Asia/Kolkata",
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "49fd368b-757d-4aed-a45c-b2291df0ff4f",
+  "versionId": "14e196df-83ef-4a31-bb80-c2eab6f6dd02",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "cbede8ced1688fa02cdf8e8bfc0a9c422f8fe98c89bb8d417b72023867340dcb"
