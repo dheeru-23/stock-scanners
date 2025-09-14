@@ -1,0 +1,358 @@
+{
+  "name": "Chartink-Screener",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js nifty100gapup \"Nifty 100 Gap up\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        144
+      ],
+      "id": "280b790d-7926-4a56-b31e-a303fd9f1c3e",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js d-w-m-supertrend-11 \"Cash-Stocks Supertrend on D,W,M\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        912
+      ],
+      "id": "8b457227-0779-4a5e-bbba-84005a455699",
+      "name": "Execute Command2"
+    },
+    {
+      "parameters": {
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js d-w-m-supertrend-indices \"Indices Supertrend on D,W,M\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        720
+      ],
+      "id": "835f42ca-e766-45df-8d16-5d86aa42fbb9",
+      "name": "Execute Command3"
+    },
+    {
+      "parameters": {
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js indicessupertrend1d \"Indices Supertrend 1D\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        528
+      ],
+      "id": "98cfa3d5-effb-4f65-8f4e-6fc07646c5da",
+      "name": "Execute Command4"
+    },
+    {
+      "parameters": {
+        "command": "cd Dheerus-Mac/Projects/chartink-scanner\nnode scanner.js supertrend1d-2 \"Cash-Supertrend-1D\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        336
+      ],
+      "id": "3f3801f6-82a4-4358-a68e-79478bc759b6",
+      "name": "Execute Command5"
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        208,
+        464
+      ],
+      "id": "f1e65ed7-009e-4665-8a5c-de47a2692b84",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdoutText = $json.stdout;\n\n// Check if stdoutText is not null, not undefined, and not empty\nif (stdoutText && stdoutText.trim() !== '') {\n  // 1. Extract the text between 'For' and 'Found'\n  const forIndex = stdoutText.indexOf('For') + 'For'.length;\n  const foundIndex = stdoutText.indexOf('Found');\n  const category = stdoutText.substring(forIndex, foundIndex).trim();\n\n  // 2. Separate individual 'Stock name'\n  const lines = stdoutText.split('\\n');\n  const stockNames = [];\n  for (const line of lines) {\n    if (line.trim().startsWith('Stock name:')) {\n      const stockName = line.replace('Stock name:', '').trim();\n      stockNames.push(stockName);\n    }\n  }\n\n  // 3. Prepare a single output item for n8n\n  const outputItem = {\n    json: {\n      category: category,\n      stockNames: stockNames\n    }\n  };\n\n  // Return the single item inside an array\n  return [outputItem];\n\n} else {\n  // If stdout is empty or null, return an empty array to stop processing this branch\n  // Or, return a specific error message.\n  return [];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        336
+      ],
+      "id": "038d3260-3076-4edc-93c4-d8506ab1d435",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdoutText = $json.stdout;\n\n// Check if stdoutText is not null, not undefined, and not empty\nif (stdoutText && stdoutText.trim() !== '') {\n  // 1. Extract the text between 'For' and 'Found'\n  const forIndex = stdoutText.indexOf('For') + 'For'.length;\n  const foundIndex = stdoutText.indexOf('Found');\n  const category = stdoutText.substring(forIndex, foundIndex).trim();\n\n  // 2. Separate individual 'Stock name'\n  const lines = stdoutText.split('\\n');\n  const stockNames = [];\n  for (const line of lines) {\n    if (line.trim().startsWith('Stock name:')) {\n      const stockName = line.replace('Stock name:', '').trim();\n      stockNames.push(stockName);\n    }\n  }\n\n  // 3. Prepare a single output item for n8n\n  const outputItem = {\n    json: {\n      category: category,\n      stockNames: stockNames\n    }\n  };\n\n  // Return the single item inside an array\n  return [outputItem];\n\n} else {\n  // If stdout is empty or null, return an empty array to stop processing this branch\n  // Or, return a specific error message.\n  return [];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        144
+      ],
+      "id": "f7152aa0-e777-443e-8b21-b3ca35e2faea",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdoutText = $json.stdout;\n\n// Check if stdoutText is not null, not undefined, and not empty\nif (stdoutText && stdoutText.trim() !== '') {\n  // 1. Extract the text between 'For' and 'Found'\n  const forIndex = stdoutText.indexOf('For') + 'For'.length;\n  const foundIndex = stdoutText.indexOf('Found');\n  const category = stdoutText.substring(forIndex, foundIndex).trim();\n\n  // 2. Separate individual 'Stock name'\n  const lines = stdoutText.split('\\n');\n  const stockNames = [];\n  for (const line of lines) {\n    if (line.trim().startsWith('Stock name:')) {\n      const stockName = line.replace('Stock name:', '').trim();\n      stockNames.push(stockName);\n    }\n  }\n\n  // 3. Prepare a single output item for n8n\n  const outputItem = {\n    json: {\n      category: category,\n      stockNames: stockNames\n    }\n  };\n\n  // Return the single item inside an array\n  return [outputItem];\n\n} else {\n  // If stdout is empty or null, return an empty array to stop processing this branch\n  // Or, return a specific error message.\n  return [];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        912
+      ],
+      "id": "766b3bf7-df9b-4b3d-8d1d-2ac5b5b94245",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdoutText = $json.stdout;\n\n// Check if stdoutText is not null, not undefined, and not empty\nif (stdoutText && stdoutText.trim() !== '') {\n  // 1. Extract the text between 'For' and 'Found'\n  const forIndex = stdoutText.indexOf('For') + 'For'.length;\n  const foundIndex = stdoutText.indexOf('Found');\n  const category = stdoutText.substring(forIndex, foundIndex).trim();\n\n  // 2. Separate individual 'Stock name'\n  const lines = stdoutText.split('\\n');\n  const stockNames = [];\n  for (const line of lines) {\n    if (line.trim().startsWith('Stock name:')) {\n      const stockName = line.replace('Stock name:', '').trim();\n      stockNames.push(stockName);\n    }\n  }\n\n  // 3. Prepare a single output item for n8n\n  const outputItem = {\n    json: {\n      category: category,\n      stockNames: stockNames\n    }\n  };\n\n  // Return the single item inside an array\n  return [outputItem];\n\n} else {\n  // If stdout is empty or null, return an empty array to stop processing this branch\n  // Or, return a specific error message.\n  return [];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        528
+      ],
+      "id": "a54bb796-654a-42ac-a086-94f2e60f7692",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdoutText = $json.stdout;\n\n// Check if stdoutText is not null, not undefined, and not empty\nif (stdoutText && stdoutText.trim() !== '') {\n  // 1. Extract the text between 'For' and 'Found'\n  const forIndex = stdoutText.indexOf('For') + 'For'.length;\n  const foundIndex = stdoutText.indexOf('Found');\n  const category = stdoutText.substring(forIndex, foundIndex).trim();\n\n  // 2. Separate individual 'Stock name'\n  const lines = stdoutText.split('\\n');\n  const stockNames = [];\n  for (const line of lines) {\n    if (line.trim().startsWith('Stock name:')) {\n      const stockName = line.replace('Stock name:', '').trim();\n      stockNames.push(stockName);\n    }\n  }\n\n  // 3. Prepare a single output item for n8n\n  const outputItem = {\n    json: {\n      category: category,\n      stockNames: stockNames\n    }\n  };\n\n  // Return the single item inside an array\n  return [outputItem];\n\n} else {\n  // If stdout is empty or null, return an empty array to stop processing this branch\n  // Or, return a specific error message.\n  return [];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        720
+      ],
+      "id": "9dceb975-6a11-445a-9167-90974b2dd51a",
+      "name": "Code5"
+    },
+    {
+      "parameters": {
+        "chatId": "893204776",
+        "text": "={{ $json.category }}: {{ $json.stockNames }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        528
+      ],
+      "id": "d5df3c8d-9109-4ce2-9308-bcdc60305845",
+      "name": "Send a text message",
+      "webhookId": "a7c301d5-23b4-4de5-9a43-4627fe44ac23",
+      "credentials": {
+        "telegramApi": {
+          "id": "FSufQjuQIHwNTZIR",
+          "name": "CI Scanner Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 10-15 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        528
+      ],
+      "id": "7a4c52a1-5ccb-41d1-8c02-28d6064b2af8",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command5": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command4": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command3": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command2": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "49fd368b-757d-4aed-a45c-b2291df0ff4f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cbede8ced1688fa02cdf8e8bfc0a9c422f8fe98c89bb8d417b72023867340dcb"
+  },
+  "id": "LSkYhifOZVtt1UbG",
+  "tags": []
+}
