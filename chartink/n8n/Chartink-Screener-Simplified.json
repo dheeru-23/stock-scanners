@@ -1,0 +1,174 @@
+{
+  "name": "Chartink-Scanner 2",
+  "nodes": [
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "={{ $json.command }} {{ $json.linkname }} {{ $json.title }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        656,
+        0
+      ],
+      "id": "f25a9939-4763-4e2f-b3fd-a75ad81c879e",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "={{ $json.stdout }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "e27f3d55-b8df-4e64-adc1-331a4f903713",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "chatId": "893204776",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "216257dc-a897-4adc-b2bb-bdeec3a821a4",
+      "name": "Send a text message",
+      "webhookId": "9427ea66-006b-49c5-be2c-97f79362f99b",
+      "credentials": {
+        "telegramApi": {
+          "id": "FSufQjuQIHwNTZIR",
+          "name": "CI Scanner Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 9-15 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b595ee85-0a2d-4a81-ac2b-812f198d0e4b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return[\n  {\n    \"command\": \"cd Dheerus-Mac/Projects/chartink-scanner && node chartink/node/scanner.js\",\n    \"linkname\": \"nifty100gapup\",\n    \"title\":\"'Nifty 100 Gap up'\"\n  },\n  {\n    \"command\": \"cd Dheerus-Mac/Projects/chartink-scanner && node chartink/node/scanner.js\",\n    \"linkname\": \"supertrend1d-2\",\n    \"title\":\"'Cash-Supertrend-1D'\"\n  },\n  {\n    \"command\": \"cd Dheerus-Mac/Projects/chartink-scanner && node chartink/node/scanner.js\",\n    \"linkname\": \"indicessupertrend1d\",\n    \"title\":\"'Indices Supertrend 1D'\"\n  },\n  {\n    \"command\": \"cd Dheerus-Mac/Projects/chartink-scanner && node chartink/node/scanner.js\",\n    \"linkname\": \"supertrend-indices\",\n    \"title\":\"'Indices Supertrend on D,W,M'\"\n  },\n  {\n    \"command\": \"cd Dheerus-Mac/Projects/chartink-scanner && node chartink/node/scanner.js\",\n    \"linkname\": \"supertrend-11\",\n    \"title\":\"'Cash-Stocks Supertrend on D,W,M'\"\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        0
+      ],
+      "id": "d8745c16-c0a0-40af-88ee-b56a56848f0f",
+      "name": "Files-Commands"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The 'items' variable holds all the data from the previous node.\n// In your case, it's a single item with a 'json' property.\nconst stdoutStrings = [];\n\n// Access the nested 'data' array from the first item\nconst dataArray = items[0].json.data;\n\nif (dataArray) {\n  for (const item of dataArray) {\n    // Check if stdout exists and is not an empty string\n    if (item.stdout && item.stdout.trim() !== '') {\n      // Push the cleaned string to our array\n      stdoutStrings.push(item.stdout.trim());\n    }\n  }\n}\n\n// Join all the collected strings with a newline character\nconst combinedOutput = stdoutStrings.join('\\n\\n');\n\n// Return a single item with the concatenated string\nreturn [{\n  json: {\n    message: combinedOutput\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "c42eeab5-86b3-4b45-a7a1-3f5aeced674d",
+      "name": "Refine-Output"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Refine-Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Files-Commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Files-Commands": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refine-Output": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 300
+  },
+  "versionId": "104372f1-c5fc-4baa-b256-4270fe810b8f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cbede8ced1688fa02cdf8e8bfc0a9c422f8fe98c89bb8d417b72023867340dcb"
+  },
+  "id": "C0WC5DTb79ch80Jd",
+  "tags": []
+}
