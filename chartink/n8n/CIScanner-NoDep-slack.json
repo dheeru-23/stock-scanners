@@ -1,0 +1,317 @@
+{
+  "name": "CIScanner-NoDep-slack",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://chartink.com/screener/{{ $json.slug }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        288
+      ],
+      "id": "0c387a45-d50a-43fb-8c21-8817467d777e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Capture the raw input data blocks from the HTTP Request (GET) node\nconst itemData = $input.item.json;\nconst htmlText = itemData.data || ''; \nconst headers = itemData.headers || {};\n\n// 2. Extract CSRF Token safely\nconst tokenMatch = htmlText.match(/meta name=[\"']csrf-token[\"'] content=[\"']([^\"']+)[\"']/);\nconst csrfToken = tokenMatch ? tokenMatch[1] : '';\n\n// 3. Extract cookies cleanly to bypass 419 validation blocks\nconst cookieHeader = headers['set-cookie'] || [];\nconst cookieString = Array.isArray(cookieHeader) \n  ? cookieHeader.map(c => c.split(';')[0]).join('; ')\n  : typeof cookieHeader === 'string' ? cookieHeader.split(';')[0] : '';\n\n/* 4. FIXED DYNAMIC LINKING: \n   Reach back directly to the 'Loop Over Items' node configuration \n   instead of reading the immediate HTTP GET response.\n   ⚠️ Make sure the name inside quotes matches your loop node exactly!\n*/\nconst loopContext = $(\"Loop Over Items\").item.json; \n\n// 5. Return the payload built perfectly for your HTTP Request1 (POST) node\nreturn {\n  slug: loopContext.slug,\n  name: loopContext.name,\n  csrfToken: csrfToken.trim(),\n  cookieString: cookieString,\n  clause: loopContext.clause\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        288
+      ],
+      "id": "4c883066-4eb7-4f85-83e8-70403950aaca",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chartink.com/screener/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-CSRF-TOKEN",
+              "value": "={{ $json.csrfToken }}"
+            },
+            {
+              "name": "Cookie",
+              "value": "={{ $json.cookieString }}"
+            },
+            {
+              "name": "X-Requested-With",
+              "value": "XMLHttpRequest"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "scan_clause",
+              "value": "={{ $json.clause }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1280,
+        288
+      ],
+      "id": "8ae5d785-4e92-472e-a6f7-571f3f5b8cc6",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const screeners = [\n  {\n    slug: \"highmomentum500\",\n    name: \"High Momentum 500\",\n    clause: \"( {57960} ( daily ema( daily close , 20 ) > daily ema( daily close , 50 ) and daily close > daily ema( daily close , 20 ) and daily close > 1 day ago high and daily volume > daily sma( daily volume , 10 ) * 1.5 and daily rsi( 14 ) > 60 and daily rsi( 14 ) < 80 and daily close > ( 5 days ago low ) * 1.02 and daily adx( 14 ) > 25 and yearly return on capital employed percentage > 20 ) )\"\n  },\n  {\n    slug: \"macdbullish-17\",\n    name: \"MACD bullish\",\n    clause: \"( {cash} ( daily macd line( 26 , 12 , 9 ) > daily macd signal( 26 , 12 , 9 ) and 1 day ago macd line( 26 , 12 , 9 ) <= 1 day ago macd signal( 26 , 12 , 9 ) and market cap > 1000 and yearly return on capital employed percentage > 20 and daily volume > daily sma( daily volume , 10 ) and daily adx( 14 ) > 25 ) )\"\n  },\n  {\n    slug: \"fib0-5supp\",\n    name: \"Fib 0.5 support\",\n    clause: \"( {cash} (  market cap >  1000 and  daily close >  daily ema(  daily close , 50 ) and  daily ema(  daily close , 50 ) >  daily ema(  daily close , 200 ) and  daily max( 20 ,  daily high ) >=  daily max( 60 ,  daily high ) *  0.95 and  daily low <=  (  (  daily max( 60 ,  daily high ) -  daily min( 60 ,  daily low ) ) *  0.5 +  daily min( 60 ,  daily low ) ) *  1.01 and  daily close >=  (  (  daily max( 60 ,  daily high ) -  daily min( 60 ,  daily low ) ) *  0.5 +  daily min( 60 ,  daily low ) ) *  0.99 and  daily close >  daily open and  daily close >=  daily low +  (  daily high -  daily low ) *  0.6 and  daily volume >  daily sma(  daily volume , 20 ) and  daily adx( 14 ) >  25 ) )\"\n  },\n  {\n    slug: \"supertrend1d-2\",\n    name: \"Supertrend 1d\",\n    clause: \"( {cash} (  yearly return on capital employed percentage >  20 and  daily close >  daily supertrend( 10 , 3.5 ) and  1 day ago  close <=  1 day ago  supertrend( 10 , 3.5 ) and  market cap >  1000 and  daily volume >  daily sma(  daily volume , 10 ) and  daily adx( 14 ) >  25 ) )\"\n  },\n  {\n    slug: \"nifty100gapup\",\n    name: \"Nifty 100 gapup\",\n    clause: \"( {33619} (  daily open >  1 day ago close *  1.0314 and  daily adx( 14 ) >  25 ) )\"\n  },\n  {\n    slug: \"indicessupertrend1d\",\n    name: \"Indices supertrend 1d\",\n    clause: \"( {45603} (  daily close >  daily supertrend( 10 , 3 ) and  1 day ago  close <=  1 day ago  supertrend( 10 , 3 ) ) )\"\n  },\n  {\n    slug: \"bearcall2-supertrend\",\n    name: \"Bear Call Supertrend\",\n    clause: \"( {33489} (  daily close <  daily supertrend( 10 , 3.5 ) and  1 day ago close >=  1 day ago supertrend( 10 , 3.5 ) and  daily volume >  daily sma(  daily volume , 10 ) and  daily adx( 14 ) >  25 and  daily rsi( 14 ) <  45 and  daily close <  20 days ago low and  market cap >  1000 ) )\"\n  },\n  {\n    slug: \"bearput-supertrend\",\n    name: \"Bear Put Supertrend\",\n    clause: \"( {33489} (  daily close <  daily supertrend( 10 , 3.5 ) and  1 day ago close >=  1 day ago supertrend( 10 , 3.5 ) and  market cap >  1000 and  daily volume >  daily sma(  daily volume , 10 ) and  daily adx( 14 ) >  25 and(  daily supertrend( 10 , 3.5 ) -  daily close ) >  (  daily avg true range( 14 ) *  1.5 ) ) )\"\n  },\n  {\n    slug: \"supertrend1d-bearish-future\",\n    name: \"Supertrend 1D Bearish\",\n    clause: \"( {33489} (  daily close <  daily supertrend( 10 , 3.5 ) and  1 day ago  close >=  1 day ago  supertrend( 10 , 3.5 ) and  market cap >  1000 and  daily volume >  daily sma(  daily volume , 10 ) and  daily adx( 14 ) >  25 ) )\"\n  },\n  {\n    slug: \"d-w-m-supertrend-11\",\n    name: \"D-W-M-Supertrend\",\n    clause: \"( {cash} (  daily close >  daily supertrend( 10 , 3.5 ) and  1 day ago  close <=  1 day ago  supertrend( 10 , 3.5 ) and  weekly close >  weekly supertrend( 10 , 3.5 ) and  monthly close >  monthly supertrend( 10 , 3.5 ) and  daily volume >  daily sma(  daily volume , 20 ) and  daily ema(  daily close , 50 ) >  daily ema(  daily close , 200 ) and  market cap >  1000 and  yearly return on capital employed percentage >  20 and  daily adx( 14 ) >  25 ) )\"\n  },\n  {\n    slug: \"d-w-m-supertrend-indices\",\n    name: \"D-W-M-Supertrend-Indices\",\n    clause: \"( {45603} (  daily close >  daily supertrend( 10 , 3 ) and  1 day ago  close <=  1 day ago  supertrend( 10 , 3 ) and  weekly close >  weekly supertrend( 10 , 3 ) and  monthly close >  monthly supertrend( 10 , 3 ) and  daily ema(  daily close , 50 ) >  daily ema(  daily close , 200 ) ) )\"\n  }\n  // 💡 Paste your remaining screeners here following the exact same structure:\n  // ,{ slug: \"slug-3\", name: \"Screener 3\", clause: \"( {ID} ( ... ) )\" }\n];\n\nreturn screeners.map(s => ({ json: s }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        288
+      ],
+      "id": "ceda8a7d-ed5c-48b6-87ea-e0bdebaeb375",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "slug, name, clause",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        384,
+        288
+      ],
+      "id": "d994a4fd-1dc4-4ae2-aadf-cdb6275202b9",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        608,
+        288
+      ],
+      "id": "9248f8dc-39b4-41ca-842b-c31cefd1eee8",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Fetch the stored briefing report lines out of workflow memory\nconst storage = $getWorkflowStaticData('global');\nconst reportArray = storage.reportLines || [];\n\n// 2. Clear out the storage memory so it starts fresh \nstorage.reportLines = [];\n\n// 3. Return the single consolidated text block to Telegram\nreturn {\n  combinedReport: \"📊 *DAILY MARKET SCREENER BRIEFING*\\n\\n\" + (reportArray.join('') || \"_Testing storage reset. Run full workflow now._\")\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        96
+      ],
+      "id": "3a80e600-331e-4e0b-a417-fc00e4106034",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. FIXED SYNTAX: Grab the scanner name using the clean property accessor method\nconst scanName = $(\"Loop Over Items\").item.json.name || \"Unknown Scanner\";\nconst responseData = $input.item.json.data || '';\n\nlet stockData = [];\ntry {\n  const parsedBody = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;\n  stockData = parsedBody.data || [];\n} catch (e) {\n  stockData = [];\n}\n\n// 2. Format the lines for this specific scan run\nlet lineText = \"\";\nif (stockData.length > 0) {\n  lineText += `✅ *${scanName}*\\n`;\n  const stockRows = stockData.map(stock => `• \\`${stock.nsecode}\\` - ${stock.name}`).join('\\n');\n  lineText += stockRows + '\\n\\n';\n} else {\n  lineText += `❌ *${scanName}*\\n_No stocks matched criteria today._\\n\\n`;\n}\n\n// 3. Save this text inside n8n's long-term workflow storage memory\nconst storage = $getWorkflowStaticData('global');\nif (!storage.reportLines) {\n  storage.reportLines = [];\n}\nstorage.reportLines.push(lineText);\n\n// 4. Pass the item right back to the loop unaltered\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        368
+      ],
+      "id": "f8e99648-eb7e-4543-91fe-3725c5ec35bd",
+      "name": "Accumulator"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "5 12-15 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        288
+      ],
+      "id": "51067adb-2625-4d7f-bcdc-1e1fca24a227",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BC2JFACSY",
+          "mode": "list",
+          "cachedResultName": "ci-scanners"
+        },
+        "text": "={{ $json.combinedReport }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1040,
+        96
+      ],
+      "id": "ed3f358d-4990-4b3a-8521-8dc130f08b6a",
+      "name": "Send a message",
+      "webhookId": "f87adc89-a044-43be-88c4-878268938002",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "O98O8XKkZGJe9yLr",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Accumulator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accumulator": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9523ce42-aacf-4e5f-933b-1d1d16abd9f9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "12fb21842b70dbfa523348f5907de689ba5cd305c803a066a4d19357180bb808"
+  },
+  "nodeGroups": [],
+  "id": "V8kkx1tsj4ve685n",
+  "tags": []
+}
